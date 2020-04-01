@@ -3,6 +3,10 @@ function fit = fitToTimeseries(data,extendTimeLength)
     if nargin < 2
         extendTimeLength = 7;
     end
+
+    myRobustOptions = {[],'andrews','bisquare','cauchy','fair',...
+        'huber','logistic','talwar','welsch'};    
+    RO = 1;
     
     totalTime = length(data);
     times = 1:(totalTime);
@@ -64,7 +68,9 @@ function fit = fitToTimeseries(data,extendTimeLength)
 
     %fullNLM = NonLinearModel.fit(fittimes,fitdata,@(b,x)fullFun(x,b),fullGuess);    
     
-	opts = statset('TolFun',1e-10,'MaxIter',1000);        
+    
+	opts = statset('TolFun',1e-10,'MaxIter',1000); 
+    opts.RobustWgtFun = myRobustOptions{RO};    
     try
         fullNLM = fitnlm(fittimes,fitdata,@(b,x)fullFun(x,b),fullGuess,'Options',opts);
         fullGuess = fullNLM.Coefficients.Estimate;

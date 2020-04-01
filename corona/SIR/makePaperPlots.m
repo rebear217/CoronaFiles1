@@ -11,6 +11,15 @@ load('../data/deathData.mat')
 clc
 close all
 perCapitaDownplot(MATdata);
+%perCapitaDownplot(MATdata,{'US'});
+
+%%
+
+clc
+close all
+ignoreChina = {true,false};
+loglogPlot(MATdata,ignoreChina{1});
+loglogPlot(MATdata,ignoreChina{2});
 
 %%
 
@@ -62,5 +71,10 @@ clear variables
 close all
 load('../data/deathData.mat')
 
+doSomeDataFitting;
+
+disp('')
+disp('------------')
 disp('Finished...')
+disp('------------')
 

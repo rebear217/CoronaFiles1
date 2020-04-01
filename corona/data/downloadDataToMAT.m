@@ -35,7 +35,10 @@ close all
 %M = M - 1;
 %M = 64;%worked up to 27 March
 %M = 65;%worked up to 28 March
-M = 66;%worked up to 29 March
+%M = 66;%worked up to 29 March
+%M = 67;%worked up to 30 March
+%M = 68;%worked up to 30 March
+M = 69;%worked up to...
 
 allCountries = {data{:,2}};
 countries = unique(allCountries);
@@ -69,13 +72,6 @@ end
 save('deathData.mat','MATdata','M')
 axis tight
 export_fig('basicDeathDataPlot.PDF')
-
-%%
-
-figure(1)
-close all
-loglogPlot(MATdata);
-export_fig('basicLogLogPlot.PDF')
 
 %%
 

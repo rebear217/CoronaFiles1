@@ -1,4 +1,5 @@
-function perCapitaDownplot(MATdata)
+function perCapitaDownplot(MATdata,includeList)
+
 
     clc
     
@@ -9,6 +10,10 @@ function perCapitaDownplot(MATdata)
 
     cList = [];
     plots = [];
+    
+    if nargin < 2
+        includeList = {};
+    end
     
     for ctry = 1:N
         Ddata = sum(MATdata.deathData{ctry},1);        
@@ -24,24 +29,18 @@ function perCapitaDownplot(MATdata)
             else
                 y = (dx./x);
                 t = 0:length(x)-1;
-                %lw = 1 + 2.0*(Ddata(end) > 100);
                 d = movmean(y,5);
                 lm = fitlm(t,d);
                 deltaD = lm.Coefficients.Estimate(2);
                 hold on
-%                if strcmp(MATdata.country{ctry}(1:2),'US') || ...
-%                        lm.coefTest < 0.05 ...
-%                        && lm.Coefficients.Estimate(2) < 0
-                if lm.coefTest < 0.05 && lm.Coefficients.Estimate(2) < 0
+                if (lm.coefTest < 0.01 && lm.Coefficients.Estimate(2) < 0) || ...
+                    ismember(MATdata.country{ctry},includeList)
                     l = '-';
                     lw = 1;
-                    %if strcmp(MATdata.country{ctry}(1:2),'US')
-                    %    lw = 4;
-                    %end
-                    %if strcmp(MATdata.country{ctry}(1:2),'Un')
-                    %    col = 'k';
-                    %    lw = 2;
-                    %end
+                    if ismember(MATdata.country{ctry},includeList)
+                        lw = 4;
+                        col = 'k';
+                    end
                     if strcmp(MATdata.country{ctry}(1:2),'Ch')
                         lw = 3;
                     end
@@ -67,7 +66,10 @@ function perCapitaDownplot(MATdata)
     xlabel('days from first recorded death')
     ylabel('deaths per day per capita')
     %title('Constant data above zero means exponential growth')
-
-    my_export_fig('perCapitaDeathDeclines.pdf')
-
+    
+    if isempty(includeList)
+        my_export_fig('perCapitaDeathDeclines.pdf')
+    else
+        my_export_fig('perCapitaDeathDeclines_IL.png')
+    end
 end
