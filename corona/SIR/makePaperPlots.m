@@ -15,6 +15,14 @@ perCapitaDownplot(MATdata);
 
 %%
 
+close all
+perCapitaDownplotWExpFit(MATdata,{},true);
+close all
+perCapitaDownplotWExpFit(MATdata,{},false);
+%perCapitaDownplotWExpFit(MATdata,{'United Kingdom','Italy'});
+
+%%
+
 clc
 close all
 ignoreChina = {true,false};
@@ -23,6 +31,11 @@ loglogPlot(MATdata,ignoreChina{2});
 
 %%
 
+clc
+close all
+PikeAnalysis(MATdata);
+
+%%
 
 close all
 clear variables
@@ -66,6 +79,7 @@ clear variables
 basicFits([],true);
 
 %%
+
 
 clear variables
 close all

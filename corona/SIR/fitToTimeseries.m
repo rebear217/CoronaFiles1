@@ -6,7 +6,7 @@ function fit = fitToTimeseries(data,extendTimeLength)
 
     myRobustOptions = {[],'andrews','bisquare','cauchy','fair',...
         'huber','logistic','talwar','welsch'};    
-    RO = 1;
+    RobustOption = 1;
     
     totalTime = length(data);
     times = 1:(totalTime);
@@ -70,14 +70,14 @@ function fit = fitToTimeseries(data,extendTimeLength)
     
     
 	opts = statset('TolFun',1e-10,'MaxIter',1000); 
-    opts.RobustWgtFun = myRobustOptions{RO};    
+    opts.RobustWgtFun = myRobustOptions{RobustOption};    
     try
         fullNLM = fitnlm(fittimes,fitdata,@(b,x)fullFun(x,b),fullGuess,'Options',opts);
         fullGuess = fullNLM.Coefficients.Estimate;
     catch
         %the above method can fail, so we can define a new grid to solve on
         %of reduced length, by J points and try again:
-        J = length(fittimes) - 1;
+        J = length(fittimes) - 4;
         while J < length(fittimes)
             try
                 tempNLM = fitnlm(fittimes(1:J),fitdata(1:J),@(b,x)fullFun(x,b),fullGuess);

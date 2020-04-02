@@ -6,24 +6,14 @@ function outsideFilename = fitToCountryData(MATdata)
     clc
     
     pickOutctry = 10;
-	extendTimeLength = 7;
+	extendTimeLength = 14;
     
     parameters = defaulParameters();
 	
     %'Austria',...
 
-    countryStrings = {'China', ...
-        'Denmark', ...
-        'France', ...
-        'Germany', ...
-        'Italy', ...
-        'Switzerland', ...
-        'Spain', ...
-        'United Kingdom', ...
-        'US', ...
-        'Iran'};
-
-        outsideFilename = [countryStrings{pickOutctry},'additionalDatafit.pdf'];
+    countryStrings = parameters.countryStrings;
+	outsideFilename = [countryStrings{pickOutctry},'additionalDatafit.pdf'];
 
     %%
 
@@ -106,7 +96,7 @@ function outsideFilename = fitToCountryData(MATdata)
     function plotMain()
     
         yLimit = max([fit.upperCI fit.fullupperCI max(dataToFit)]);
-        
+            
         if semilogPlotType
             s = semilogy(dataToFit,0*dataToFit);
             axis tight
@@ -162,7 +152,9 @@ function outsideFilename = fitToCountryData(MATdata)
         
         axis tight
         YL = ylim;
-        ylim([0 YL(2)])
+        finalYLimit = min([YL(2) 5*max(dataToFit)]);
+
+        ylim([0 finalYLimit])
         
         legend({[countryStr,' data'],...
             ['SIR model (adj R^2 \approx',num2str(fit.adjR2,4),')'],...            
