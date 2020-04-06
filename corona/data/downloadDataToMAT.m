@@ -38,8 +38,12 @@ close all
 %M = 66;%worked up to 29 March
 %M = 67;%worked up to 30 March
 %M = 68;%worked up to 30 March
-%M = 69;%worked up to 2 April
-M = 70;%worked up to 
+%M = 69;%worked up to 1 April
+%M = 70;%worked up to 2 April
+%M = 71;%worked up to 3 April
+%M = 72;%worked up to 4 April
+%M = 73;%worked up to 5 April
+M = 74;%worked up to 
 
 allCountries = {data{:,2}};
 countries = unique(allCountries);

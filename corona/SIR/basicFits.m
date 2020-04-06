@@ -3,6 +3,7 @@ function gprMdl = basicFits(MATdata,savePDF)
     if nargin == 0 || isempty(MATdata)
         load('../data/deathData.mat')
     end
+    
     if nargin < 2
         savePDF = false;
     end
@@ -24,7 +25,8 @@ function gprMdl = basicFits(MATdata,savePDF)
         'United Kingdom', ...
         'US'};
 
-    turningPointCountries = [1 3 5 6 7];
+    turningPointCountries = 1:9;
+    
     PL = zeros(1,length(turningPointCountries)+1);
     
 	fitFunctions{1} = @(p,t)exp(p(1) + p(2)*t);

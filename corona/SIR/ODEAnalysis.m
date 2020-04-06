@@ -1,8 +1,12 @@
-function PikeAnalysis(MATdata)
+function ODEAnalysis(MATdata)
 
     close all
     figure(1)
     set(1,'pos',[60     1   885   704])
+    figure(2)
+    set(2,'pos',[60     1   885   704])
+    figure(3)
+    set(3,'pos',[60     1   885   704])
     
     parameters = defaulParameters();
     countryStrings = parameters.countryStrings;
@@ -43,7 +47,7 @@ function PikeAnalysis(MATdata)
         
         fit = fitnlm(times,scdataToFit,@(p,t)Solve(p,t),pg,...
             'Options',opts);
-        betterGuess = fit.Coefficients.Estimate;
+        betterGuess{ctry} = fit.Coefficients.Estimate;
 
         figure(1)
         subplot(3,3,ctry)
@@ -51,7 +55,7 @@ function PikeAnalysis(MATdata)
         Y = deaths*fit.feval(extendtimes);
 
         %policy model error bars:    
-        [beta,resid,J,sigma] = nlinfit(times,scdataToFit,@(p,t)Solve(p,t),betterGuess);
+        [beta,resid,J,sigma] = nlinfit(times,scdataToFit,@(p,t)Solve(p,t),betterGuess{ctry});
         [deltaFit, delta] = nlpredci(@(p,t)Solve(p,t),extendtimes,beta,resid,'Covar',sigma);
 
         upperCI = deltaFit + delta;
@@ -61,7 +65,7 @@ function PikeAnalysis(MATdata)
         ylimit = max([1.5*Y dataToFit]);
         
         rectangle('position',[times(end) 0 extendtime ylimit],...
-            'facecolor',[1 1 1]*0.8,'edgecolor','none');
+            'facecolor',parameters.grey,'edgecolor','none');
         hold on
         
         plot(extendtimes,Y,'-k','linewidth',1);
@@ -82,20 +86,81 @@ function PikeAnalysis(MATdata)
             ylabel('cumulative deaths')
         end
         if ismember(ctry , [7,8,9])
-            xlabel('days from first recorded case')
+            xlabel('days from first recorded death')
         end
         
         if ctry == 2
-            text(10,ylimit*0.5,'$\frac{dD}{dt} = a - bD - \gamma e^{-D}$',...
+            text(10,ylimit*0.5,'$\frac{dD}{dt} = \alpha - \beta D - \gamma e^{-D}$',...
                 'interpreter','latex');
         end
         if ctry == 1
             text(times(end) + 1,ylimit*0.2,{[num2str(extendtime),' day'],'projection'});
         end
-    end
 
-    my_export_fig('PikeODEAnalysis.pdf')
+        dDTF = diff(dataToFit);
+        
+        figure(2)
+        
+        subplot(3,3,ctry)
+        dY = diff(Y);
+        plot(extendtimes(2:end),dY,'-k','linewidth',1);
+        hold on
+        plot(times(2:end),dDTF,'.','markersize',26)   
+        axis tight
+
+        if ismember(ctry , [1,4,7])
+            ylabel('daily deaths')
+        end
+        if ismember(ctry , [7,8,9])
+            xlabel('days from first recorded death')
+        end
+        
+        legend({'SIR fit',countryStrings{ctry}},'Location','southeast')
+        %legend('boxoff')
+        
+        figure(3)
+        subplot(3,3,ctry)
+        PCD = dDTF./dataToFit(2:end);
+        plot(extendtimes(2:end),dY./Y(2:end),'-k','linewidth',1);
+        hold on
+        plot(times(2:end),PCD,'.','markersize',26)   
+        axis tight
+        ylim([0 max(PCD)*1.05]);
+        
+        if ismember(ctry , [1,4,7])
+            ylabel('per capita daily deaths')
+        end
+        if ismember(ctry , [7,8,9])
+            xlabel('days from first recorded death')
+        end
+        
+        legend({'SIR fit',countryStrings{ctry}},'Location','northeast')
+        legend('boxoff')
+        
+    end
     
+    figure(4)
+    for ctry = 1:9
+        plot3(betterGuess{ctry}(1),betterGuess{ctry}(2),betterGuess{ctry}(3),'.k',...
+            'markersize',24);
+        text(betterGuess{ctry}(1),betterGuess{ctry}(2),betterGuess{ctry}(3),...
+            countryStrings{ctry});
+        hold on
+    end
+    xlabel('\alpha')
+    ylabel('\beta')
+    zlabel('\gamma')
+    title('$\frac{dD}{dt} = \alpha - \beta \exp(-D) - \gamma D$',...
+        'interpreter','latex');
+    box on
+
+    figure(1)
+	my_export_fig('ODEAnalysis.pdf')
+    figure(2)
+	my_export_fig('ODEAnalysisInfecteds.pdf')
+    figure(3)
+	my_export_fig('ODEAnalysisPerCapita.pdf')
+
 end
     
 function solution = Solve(p,T)

@@ -65,5 +65,7 @@ function parameters = defaulParameters()
         'United Kingdom', ...
         'US', ...
         'Iran'};
+    
+    parameters.movingAverageDays = 5;
  
 end

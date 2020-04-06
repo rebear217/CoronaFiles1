@@ -11,41 +11,36 @@ function cList = loglogPlot(MATdata,ignoreChina)
     end
 
     N = length(MATdata.country);
-    simTimeLength = 40;
-    PCAdims = 15;
-    maxDeathsToIncludeCountry = 50;
-    movingAverage = 0;
+    simTimeLength = 45;
+    PCAdims = 6;
+    minDeathsToIncludeCountry = 80;
+    movingAverage = 5;
     highlightUS = false;
-    highlightUK = false;
+    highlightUK = true;
     
     cList = [];
     j = 1;
     compactData = {};
     for ctry = 1:N
         Ddata = sum(MATdata.deathData{ctry},1);
-        F = find(Ddata,1,'first');
-        if (Ddata(end) > maxDeathsToIncludeCountry) && (not(ignoreChina) || not(strcmp('China',MATdata.country{ctry})))
+        if (Ddata(end) > minDeathsToIncludeCountry) && (not(ignoreChina) || not(strcmp('China',MATdata.country{ctry})))
+            [PCD,y,x] = getPCD(Ddata,MATdata.country{ctry});
             s = (ctry-1)/(N-1);
             col = [s 0.5 1-s];
-            x = Ddata(F:end);
-            y = diff(x);
-            if any(y < 0) || any(x < 0)
-                disp(['-ve data in ',MATdata.country{ctry}])
-            else
-                cList = [cList ctry];
-                x = Ddata((F+1):end);
-                lw = 1 + 1.0*(Ddata(end) > 1000);
+            cList = [cList ctry];
+            lw = 1 + 1.0*(Ddata(end) > 1000);
 
-                subplot(1,2,1)
-                loglog(x,y,'-','linewidth',lw,'color',col);
-                hold on
-                subplot(1,2,2)
-                plot(y./x,'-','linewidth',lw,'color',col);
-                hold on
-                %compactData{j} = x;
-                compactData{j} = y;
-                j = j + 1;
-            end
+            subplot(1,2,1)
+            loglog(x,y,'-','linewidth',lw,'color',col);
+            hold on
+            
+            subplot(1,2,2)
+            plot(PCD,'-','linewidth',lw,'color',col);
+            hold on
+            
+            %compactData{j} = x;
+            compactData{j} = y;
+            j = j + 1;
         end
     end
 
@@ -113,6 +108,10 @@ function cList = loglogPlot(MATdata,ignoreChina)
         subplot(2,1,1)
         pl(c) = plot(smallTimes,Y,'-','color',col,'linewidth',lw);
         hold on
+        if strcmp(MATdata.country{ctry},'United Kingdom') && highlightUK
+            [PCD,y,x] = getPCD(sum(MATdata.deathData{ctry},1),MATdata.country{ctry});
+            plot(1:length(y),y,'.','color',col,'markersize',24);
+        end
         
         subplot(2,1,2)
         CY = cumsum(Y);

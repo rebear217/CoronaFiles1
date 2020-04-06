@@ -33,7 +33,7 @@ loglogPlot(MATdata,ignoreChina{2});
 
 clc
 close all
-PikeAnalysis(MATdata);
+ODEAnalysis(MATdata);
 
 %%
 

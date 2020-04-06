@@ -35,6 +35,9 @@ function fit = fitToTimeseries(data,extendTimeLength)
     %guess = [p1guess , p2guess];
     guess = [0 , 1];
 
+    opts = statset('MaxIter',1000,'TolX',1e-10,'TolFun',1e-10);
+    
+    
     try
     	fit0 = fitnlm(fittimes,fitdata/deathsSoFar,@(b,x)baseFun1(x,b),guess);
     catch
