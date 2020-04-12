@@ -13,7 +13,7 @@ function gprMdl = basicFits(MATdata,savePDF)
     
     parameters = defaulParameters();
     
-    extendDays = 2;
+    extendDays = 7;
     
     countryStrings = {'China', ...
         'Denmark', ...
@@ -138,7 +138,7 @@ function gprMdl = basicFits(MATdata,savePDF)
         ylim([0 YL(2)])
         %xlim([1 extendTime(end)])
         
-        plot([extendTime(end-extendDays) extendTime(end-extendDays)],[0 YL(2)],'-k','linewidth',1)
+        plot([L L],[0 YL(2)],'-k','linewidth',1)
         
         if ismember(ctry,[7 8 9])
             xlabel('day')

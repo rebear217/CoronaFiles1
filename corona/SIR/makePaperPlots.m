@@ -1,3 +1,4 @@
+
 if not(exist('figures','dir'))
     mkdir('figures')
 end
@@ -26,68 +27,89 @@ perCapitaDownplotWExpFit(MATdata,{},false);
 clc
 close all
 ignoreChina = {true,false};
-loglogPlot(MATdata,ignoreChina{1});
-loglogPlot(MATdata,ignoreChina{2});
+[~,loglogestimateNoChina] = loglogPlot(MATdata,ignoreChina{1});
+[~,loglogestimate] = loglogPlot(MATdata,ignoreChina{2});
 
 %%
 
 clc
 close all
-ODEAnalysis(MATdata);
+[ODEestimate,ODEestimate99] = ODEAnalysis(MATdata);
 
 %%
 
 close all
-clear variables
 generateExemplars;
 
 %%
 
 close all
-clear variables
 generatePlots;
 
 %%
 
 close all
-clear variables
 generateHeatmap;
 
 %%
 
 close all
-clear variables
 trialOneIntervention;
 
 %%
 
 %this displays a p-values table in latex:
 close all
-clear variables
-doSomeDataFitting;
+[DSDestimate,DSDestimate99,latexStr] = doSomeDataFitting;
 
 %%
 
 close all
-clear variables
 testDataFits;
 
 %%
 
 close all
-clear variables
 basicFits([],true);
 
 %%
 
-
-clear variables
 close all
-load('../data/deathData.mat')
+OneCountryODEAnalysis(MATdata,'Spain');
+close all
+OneCountryODEAnalysis(MATdata,'United Kingdom');
 
-doSomeDataFitting;
+%%
+
+disp(latexStr);
+
+%%
 
 disp('')
+disp('')
+
+disp('------------------------')
+disp('Prediction stats...')
+disp('------------------------')
+
+UKestimateVector = [loglogestimateNoChina,...
+    loglogestimate,...
+    DSDestimate(1),...
+    DSDestimate(2),...
+    DSDestimate99(1),...
+    DSDestimate99(2),...    
+    ODEestimate,...
+    ODEestimate99];
+
+disp(['Vector : ',num2str(UKestimateVector,5)]);
+disp(['Mean : ',num2str(mean(UKestimateVector),5)]);
+disp(['Std: ',num2str(std(UKestimateVector),5)]);
+
+%%
+
+disp('')
+disp('')
+
 disp('------------')
 disp('Finished...')
 disp('------------')

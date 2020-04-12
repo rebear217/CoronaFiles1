@@ -1,4 +1,4 @@
-function cList = loglogPlot(MATdata,ignoreChina)
+function [cList,UKestimate] = loglogPlot(MATdata,ignoreChina)
 
     clc
     close all
@@ -11,9 +11,9 @@ function cList = loglogPlot(MATdata,ignoreChina)
     end
 
     N = length(MATdata.country);
-    simTimeLength = 45;
+    simTimeLength = 55;
     PCAdims = 6;
-    minDeathsToIncludeCountry = 80;
+    minDeathsToIncludeCountry = 170;
     movingAverage = 5;
     highlightUS = false;
     highlightUK = true;
@@ -108,13 +108,16 @@ function cList = loglogPlot(MATdata,ignoreChina)
         subplot(2,1,1)
         pl(c) = plot(smallTimes,Y,'-','color',col,'linewidth',lw);
         hold on
+
+        CY = cumsum(Y);
+
         if strcmp(MATdata.country{ctry},'United Kingdom') && highlightUK
             [PCD,y,x] = getPCD(sum(MATdata.deathData{ctry},1),MATdata.country{ctry});
             plot(1:length(y),y,'.','color',col,'markersize',24);
+            UKestimate = CY(end);
         end
         
         subplot(2,1,2)
-        CY = cumsum(Y);
         plot(smallTimes,CY,'-','color',col,'linewidth',lw);
         hold on
         CYCD = cumsum(compactData{c});
@@ -132,7 +135,7 @@ function cList = loglogPlot(MATdata,ignoreChina)
     legend('boxoff')
     axis tight
     YL = ylim;
-    ylim([0 YL(2)])
+    ylim([0 1.3*YL(2)])
     xlabel('days after first death')
     ylabel('deaths per day')
     
@@ -143,6 +146,8 @@ function cList = loglogPlot(MATdata,ignoreChina)
     xlabel('days after first death')
     ylabel('cumulative deaths')
     axis tight
+    YL = ylim;
+    ylim([0 1.3*YL(2)])
     
     str = '';
     if ignoreChina

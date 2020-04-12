@@ -4,6 +4,19 @@ clear variables
 
 %%
 
+%there are inconsistencies in French data: so this
+%is recovered by hand from https://dashboard.covid19.data.gouv.fr
+%on Thur 9 April
+urlFranceData = flipud([7632;7091;6494;5889;5532;5091;4503;4032;3523;3024;2606;...
+2314;1995;1696;1331;1100;860;674;562;372;264;175;148;127;91;79;61;48;33;25;19;16;9;7;...
+5;3;1])';
+%this is merged with the JH data below
+%I am still not sure what the real data is having done this...
+
+%China data head has been taken from ECDC and sent to me by Tom Pike
+
+%%
+
 %csv source
 %https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv
 
@@ -19,8 +32,6 @@ outfilename = websave(CSVfilename,URL,options);
 data = importData(outfilename);
 %get the data itself:
 dataMatrix = csvread(outfilename,2,5);
-
-%data = importData('time_series_covid19_deaths_global.csv');
 
 %%
 
@@ -43,13 +54,19 @@ close all
 %M = 71;%worked up to 3 April
 %M = 72;%worked up to 4 April
 %M = 73;%worked up to 5 April
-M = 74;%worked up to 
+%M = 74;%worked up to 6 April
+%M = 75;%worked up to 7 April
+%M = 76;%worked up to 8 April
+%M = 77;%worked up to 9 April
+%M = 78;%worked up to 10 April
+M = 79;%worked up to
 
 allCountries = {data{:,2}};
 countries = unique(allCountries);
 
 MATdata.country = {};
 MATdata.deathData = {};
+MATdata.M = M;
 
 for c = 1:length(countries)
     
@@ -66,7 +83,19 @@ for c = 1:length(countries)
     MATdata.country{c} = thisCountry;
     MATdata.deathData{c} = rowData;
     
-    figure(2)
+    if strcmp(thisCountry,'France')
+        FranceData = sum(MATdata.deathData{c},1);        
+        FranceDataTail = FranceData(74:end);
+        MATdata.deathData{c} = [urlFranceData FranceDataTail];        
+    end
+    
+	%if strcmp(thisCountry,'China')
+    %    ChinaHead = cumsum([1 0 0 0 1 0 0 0 1 0 3]);
+    %	ChinaData = sum(MATdata.deathData{c},1);        
+    %    MATdata.deathData{c} = [ChinaHead ChinaHead(end) + ChinaData];
+    %end
+    
+    figure(1)
     semilogy(sum(rowData,1));
     hold on
     xlabel('day')
@@ -74,7 +103,7 @@ for c = 1:length(countries)
     
 end
 
-save('deathData.mat','MATdata','M')
+save('deathData.mat','MATdata')
 axis tight
 export_fig('basicDeathDataPlot.PDF')
 

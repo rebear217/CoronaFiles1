@@ -1,4 +1,4 @@
-function ODEAnalysis(MATdata)
+function [UKestimate,UKestimateMaxCI95] = ODEAnalysis(MATdata,countryStrings)
 
     close all
     figure(1)
@@ -9,8 +9,13 @@ function ODEAnalysis(MATdata)
     set(3,'pos',[60     1   885   704])
     
     parameters = defaulParameters();
-    countryStrings = parameters.countryStrings;
+    if nargin < 2
+        countryStrings = parameters.countryStrings;
+    end
     extendtime = 35;
+    
+    UKestimateMaxCI95 = [];
+    UKestimate = [];
     
     for ctry = 1:9
 
@@ -137,6 +142,10 @@ function ODEAnalysis(MATdata)
         legend({'SIR fit',countryStrings{ctry}},'Location','northeast')
         legend('boxoff')
         
+        if strcmp(countryStr,'United Kingdom')
+            UKestimate = Y(end);
+            UKestimateMaxCI95 = deaths*upperCI(end);            
+        end
     end
     
     figure(4)
