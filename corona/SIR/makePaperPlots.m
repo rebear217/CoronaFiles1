@@ -75,9 +75,55 @@ basicFits([],true);
 %%
 
 close all
-OneCountryODEAnalysis(MATdata,'Spain');
+[~,~,IG_Italy] = OneCountryODEAnalysis(MATdata,'Italy');
 close all
-OneCountryODEAnalysis(MATdata,'United Kingdom');
+[~,~,IG_Spain] = OneCountryODEAnalysis(MATdata,'Spain');
+close all
+[~,~,IG_UK] = OneCountryODEAnalysis(MATdata,'United Kingdom');
+close all
+[~,~,IG_US] = OneCountryODEAnalysis(MATdata,'US');
+close all
+[~,~,IG_China] = OneCountryODEAnalysis(MATdata,'China');
+close all
+[~,~,IG_NY] = OneCountryODEAnalysis(USdata,'New York');
+close all
+[~,~,IG_CA] = OneCountryODEAnalysis(USdata,'California');
+close all
+[~,~,IG_Denmark] = OneCountryODEAnalysis(MATdata,'Denmark');
+close all
+[~,~,IG_Germany] = OneCountryODEAnalysis(MATdata,'Germany');
+close all
+[~,~,IG_France] = OneCountryODEAnalysis(MATdata,'France');
+close all
+[~,~,IG_Switzerland] = OneCountryODEAnalysis(MATdata,'Switzerland');
+close all
+[~,~,IG_Sweden] = OneCountryODEAnalysis(MATdata,'Sweden');
+close all
+
+Italydeaths = OneCountryIsolationAnalysis(MATdata,'Italy',IG_Italy);
+close all
+Spaindeaths = OneCountryIsolationAnalysis(MATdata,'Spain',IG_Spain);
+close all
+UKdeaths = OneCountryIsolationAnalysis(MATdata,'United Kingdom',IG_UK);
+close all
+USdeaths = OneCountryIsolationAnalysis(MATdata,'US',IG_US,[],[2 2 2 2 1]);
+close all
+Chinadeaths = OneCountryIsolationAnalysis(MATdata,'China',IG_China);
+close all
+%CA & NY needs wierd initial guess strategies for each fit seperately:
+NYdeaths = OneCountryIsolationAnalysis(USdata,'New York',IG_NY,57,[1 2 1 1 1]);
+close all
+CAdeaths = OneCountryIsolationAnalysis(USdata,'California',IG_CA,56,[1 2 2 2 1]);
+close all
+Denmarkdeaths = OneCountryIsolationAnalysis(MATdata,'Denmark',IG_Denmark);
+close all
+Germanydeaths = OneCountryIsolationAnalysis(MATdata,'Germany',IG_Germany,[],[1 1 2 2 1]);
+close all
+Francedeaths = OneCountryIsolationAnalysis(MATdata,'France',IG_France);
+close all
+Switzerlanddeaths = OneCountryIsolationAnalysis(MATdata,'Switzerland',IG_Switzerland);
+close all
+Swedendeaths = OneCountryIsolationAnalysis(MATdata,'Sweden',IG_Sweden);
 
 %%
 
@@ -99,11 +145,13 @@ UKestimateVector = [loglogestimateNoChina,...
     DSDestimate99(1),...
     DSDestimate99(2),...    
     ODEestimate,...
-    ODEestimate99];
+    ODEestimate99 UKdeaths];
 
-disp(['Vector : ',num2str(UKestimateVector,5)]);
+%%
+
+disp(['Estimates : ',num2str(UKestimateVector,5)]);
 disp(['Mean : ',num2str(mean(UKestimateVector),5)]);
-disp(['Std: ',num2str(std(UKestimateVector),5)]);
+disp(['95% CI: ',num2str(mean(UKestimateVector) + 2*std(UKestimateVector)/sqrt(length(UKestimateVector)),5)]);
 
 %%
 

@@ -20,16 +20,6 @@ function parameters = defaulParameters()
 
     parameters.plot = true;
 
-    %    lam = p(1);
-    %    ip = p(2);
-    %    im = p(3);
-    %    d = p(4);
-    %    rho = p(5);
-    %    lamE = p(6);
-    %    rhoI = p(7);
-
-    parameters.grey = [1 1 1]*0.9;
-
     %standard initial conditions:
     I0 = 1e-3;
     S0 = 1-I0;
@@ -48,7 +38,8 @@ function parameters = defaulParameters()
     parameters.ylabel = 'freq';
     parameters.xlabel = 'time';
     
-    parameters.deadlabel = 'dead (as %S(0)';
+    parameters.deadlabel = 'deaths (%S(0))';
+    parameters.dailydeadlabel = 'daily deaths (%S(0) per diem)';
     
     %the observation time used for a feedback control policy:
     parameters.T = 0.5;
@@ -66,6 +57,17 @@ function parameters = defaulParameters()
         'US', ...
         'Iran'};
     
+    parameters.LockdownStart = [1 , 48 , 54 , 57 , 46 , NaN , 51 , 61 , 57 , NaN];
+
+    %US states:
+    %California: 56
+    %New York: 57
+    
     parameters.movingAverageDays = 3;
+    
+    parameters.red = 0.75*[1 0.5 0.5];
+    parameters.green = 0.75*[0.5 1 0.5];
+    parameters.blue = 0.75*[0.5 0.5 1];
+    parameters.grey = [1 1 1]*0.9;
  
 end

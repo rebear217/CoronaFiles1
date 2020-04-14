@@ -7,7 +7,7 @@ function [outsideFilename,...
     clc
     
     pickOutctry = 10;
-	extendTimeLength = 14;
+	extendTimeLength = 28;
     
     parameters = defaulParameters();
 	

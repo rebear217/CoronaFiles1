@@ -170,12 +170,15 @@ function trialOneIntervention()
         relD = 100*(1 - D / dnopolicy);
 
         figure(1)
-
+        set(1,'pos',[49         281        1232         424])
+        
+        subplot(1,2,1)
         cp = (j-1)/(length(thresholds)-1);
         colour = cp*[1 0 0] + (1-cp)*[0 0 1];
 
         deathNumbers = 100*allEpistates(:,7);
-        plot(allEpitimes,deathNumbers,'-','color',colour)
+        semilogx(allEpitimes,deathNumbers,'-','color',colour)
+        hold on
         save(['./synthMatFiles/syntheticDeaths_',num2str(j)],'allEpitimes','deathNumbers');
 
         axis tight
@@ -183,6 +186,17 @@ function trialOneIntervention()
         xlabel(parameters.xlabel)
         ylabel(parameters.deadlabel)
 
+        subplot(1,2,2)
+
+        loglog(allEpitimes(2:end),diff(deathNumbers),'-','color',colour)
+        hold on
+        
+        axis tight
+        xlim([1 controlTestTime])
+        xlabel(parameters.xlabel)
+        ylabel(parameters.dailydeadlabel)
+        ylim([1e-5 1]);
+        
         figure(2)
         set(2,'pos',[29 1 1117 704])
         subplot(length(thresholds)/2,2,j)
@@ -207,7 +221,11 @@ function trialOneIntervention()
     end
 
     figure(1)
+    subplot(1,2,1)
     legend(controllegends,'Location','southeast');
+    legend('boxoff')
+    subplot(1,2,2)
+    legend(controllegends,'Location','northeast');
     legend('boxoff')
 
     %%

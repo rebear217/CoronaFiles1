@@ -61,7 +61,7 @@ function [UKestimate,UKestimateMaxCI95] = ODEAnalysis(MATdata,countryStrings)
 
         %policy model error bars:    
         [beta,resid,J,sigma] = nlinfit(times,scdataToFit,@(p,t)Solve(p,t),betterGuess{ctry});
-        [deltaFit, delta] = nlpredci(@(p,t)Solve(p,t),extendtimes,beta,resid,'Covar',sigma);
+        [deltaFit, delta] = nlpredci(@(p,t)Solve(p,t),extendtimes,beta,resid,'Covar',sigma,'alpha',0.01);
 
         upperCI = deltaFit + delta;
         lowerCI = deltaFit - delta;
@@ -78,14 +78,14 @@ function [UKestimate,UKestimateMaxCI95] = ODEAnalysis(MATdata,countryStrings)
         plot(times,dataToFit,'.','markersize',26)        
         axis tight
         ylim([0 ylimit])
-        
-        legend({['SIR fit (adj R^2 \approx ',num2str(fit.Rsquared.Adjusted,4),' )'],...
-            [countryStrings{ctry},' data']},'Location','northwest')
-        legend('boxoff')
 
         %plot(extendtimes,deaths*midCI,'-k','linewidth',1)
         %plot(extendtimes,deaths*lowerCI,':k')
         plot(extendtimes,deaths*upperCI,':k')
+        
+        legend({['SIR fit (adj R^2 \approx ',num2str(fit.Rsquared.Adjusted,4),' )'],...
+            [countryStrings{ctry},' data'],'99% CI'},'Location','northwest')
+        legend('boxoff')
         
         if ismember(ctry , [1,4,7])
             ylabel('cumulative deaths')
@@ -95,7 +95,7 @@ function [UKestimate,UKestimateMaxCI95] = ODEAnalysis(MATdata,countryStrings)
         end
         
         if ctry == 2
-            text(10,ylimit*0.5,'$\frac{dD}{dt} = \alpha - \beta D - \gamma e^{-D}$',...
+            text(10,ylimit*0.5,'$\frac{dD}{dt} = \alpha - \beta D - \gamma e^{-\mu D}$',...
                 'interpreter','latex');
         end
         if ctry == 1
@@ -121,7 +121,7 @@ function [UKestimate,UKestimateMaxCI95] = ODEAnalysis(MATdata,countryStrings)
         end
         
         legend({'SIR fit',countryStrings{ctry}},'Location','southeast')
-        %legend('boxoff')
+        legend('boxoff')
         
         figure(3)
         subplot(3,3,ctry)

@@ -17,7 +17,7 @@ function timeseriescovid19deathsglobal = importData(filename)
     %% Initialize variables.
     delimiter = ',';
     if nargin<=2
-        startRow = 3;
+        startRow = 2;
         endRow = inf;
     end
 
