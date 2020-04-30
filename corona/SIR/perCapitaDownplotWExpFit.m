@@ -20,10 +20,11 @@ function perCapitaDownplotWExpFit(MATdata,includeList,logtrue)
     fitfun = @(p,t) p(3) * exp(-abs(p(1))*t) ./ (1 + abs(p(2))*exp(-abs(p(1))*t));
     extendTime = 0;
     adjR2limit = 0.6;
-    
+    parameters = defaulParameters();
+
     for ctry = 1:N
         Ddata = sum(MATdata.deathData{ctry},1);        
-        if (Ddata(end) > 100)
+        if (Ddata(end) > parameters.limitDeaths)
             s = (ctry-1)/(N-1);
             col = [s 0.5 1-s];
             d = getPCD(Ddata,MATdata.country{ctry});

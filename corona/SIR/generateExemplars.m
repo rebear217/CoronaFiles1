@@ -8,7 +8,7 @@ function generateExemplars()
     parameters = defaulParameters();
     parameters.plot = true;
 
-    parameters.timeInitial = 2;
+    parameters.timeInitial = 3;
     parameters.timeIso = 5;
     parameters.totalTime = 20;
 

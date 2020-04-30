@@ -1,4 +1,8 @@
-function [PCD,dx,x] = getPCD(Ddata,country)
+function [PCD,dx,x] = getPCD(Ddata,country,DisplayOff)
+
+    if nargin < 3
+        DisplayOff = false;
+    end
 
     parameters = defaulParameters();
 
@@ -19,7 +23,10 @@ function [PCD,dx,x] = getPCD(Ddata,country)
         %remove possible -ve daily death data:
         dx = dx.*(dx >= 0) + 0*(dx < 0);
         x = cumsum(dx);
-        disp(['Assuming 0 for -ve ddata in ',country])
+        
+        if ~DisplayOff
+            disp(['Assuming 0 for -ve ddata in ',country])
+        end
     end
     
     x = Ddata((F+1):end);

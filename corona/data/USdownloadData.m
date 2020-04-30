@@ -70,7 +70,8 @@ end
 F = find(strcmp(MATdata.country,'China'));
 USdata.country{ss} = 'China';
 %Just in case China has a trailing zero, remove it:
-USdata.deathData{ss} = MATdata.deathData{F}(:,1:end-1);
+%USdata.deathData{ss} = MATdata.deathData{F}(:,1:end-1);
+USdata.deathData{ss} = MATdata.deathData{F};
 
 save('USdeathData.mat','USdata')
 axis tight

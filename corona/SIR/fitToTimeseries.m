@@ -18,7 +18,7 @@ function fit = fitToTimeseries(data,extendTimeLength)
     fullFun = @(t,p) p(7)*(exp(-abs(p(6)))*baseFun1(t,p(1:2)) + ...
         (1-exp(-abs(p(6))))*baseFun2(t,p(3:5)));
 
-	doubleDelayFun = @(t,p) p(8)*(exp(-abs(p(7)))*baseFun1(t,p(1:3)) + ...
+	doubleDelayFun = @(t,p) p(8)*(exp(-abs(p(7)))*baseFun2(t,p(1:3)) + ...
         (1-exp(-abs(p(7))))*baseFun2(t,p(4:6)));
 
     %%
@@ -35,8 +35,7 @@ function fit = fitToTimeseries(data,extendTimeLength)
     %guess = [p1guess , p2guess];
     guess = [0 , 1];
 
-    opts = statset('MaxIter',1000,'TolX',1e-8,'TolFun',1e-8);
-    
+    opts = statset('MaxIter',200,'TolX',1e-18,'TolFun',1e-18);
     
     try
     	fit0 = fitnlm(fittimes,fitdata/deathsSoFar,@(b,x)baseFun1(x,b),guess,'Options',opts);

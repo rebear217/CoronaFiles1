@@ -6,12 +6,10 @@ function [outsideFilename,...
     close all
     clc
     
-    pickOutctry = 10;
+    pickOutctry = 2;
 	extendTimeLength = 28;
     
     parameters = defaulParameters();
-	
-    %'Austria',...
 
     countryStrings = parameters.countryStrings;
 	outsideFilename = [countryStrings{pickOutctry},'additionalDatafit.pdf'];
@@ -28,7 +26,7 @@ function [outsideFilename,...
     latexStr = [latexStr '\hline' char(13)];
     latexStr = [latexStr '\hline' char(13)];
     
-    for ctry = 1:length(countryStrings)
+    for ctry = 1:6
 
         countryStr = countryStrings{ctry};
 
@@ -45,7 +43,7 @@ function [outsideFilename,...
             fit = fitToTimeseries(dataToFit,extendTimeLength);
 
             StErr = exp(-abs(fit.fullSE(6)))*abs(fit.fullSE(6));
-            ddStErr = exp(-abs(fit.ddSE(6)))*abs(fit.ddSE(6));
+            ddStErr = exp(-abs(fit.ddSE(7)))*abs(fit.ddSE(7));
 
             dp = 4;
 
@@ -64,39 +62,39 @@ function [outsideFilename,...
 
             if ctry == pickOutctry
                 figure(1)
-                set(1,'pos',[77         291        1109         414])
+                set(1,'pos',[77         291        555         414])
 
-                subplot(1,2,1)
+                %subplot(1,2,1)
                 semilogPlotType = false;
                 countryOutplot = true;
                 plotMain()
                 %xlim([35 65])
                 %ylim([2600 3400])
 
-                subplot(1,2,2)
-                plot(times,dataToFit - basicFit)
-                hold on
-                plot(times,dataToFit - compositeFit)
+                %subplot(1,2,2)
+                %plot(times,dataToFit - basicFit)
+                %hold on
+                %plot(times,dataToFit - compositeFit)
 
-                xlabel('days from first recorded case')
-                ylabel('death differential')
-                axis tight
-                legend({'data - SIR model','data - isolation model'})
-                legend('boxoff')
+                %xlabel('days from first recorded case')
+                %ylabel('death differential')
+                %axis tight
+                %legend({'data - log model','data - 2x log model'})
+                %legend('boxoff')
 
             end
 
-            if ctry <= 9
+            if ctry <= 6
                 figure(2)
-                set(2,'pos',[32 1 1229 704])
-                subplot(3,3,ctry)
+                set(2,'pos',[32         174        1249         531])
+                subplot(2,3,ctry)
                 semilogPlotType = false;
                 countryOutplot = false;
                 plotMain()
 
                 figure(3)
-                set(3,'pos',[32 1 1229 704])
-                subplot(3,3,ctry)
+                set(3,'pos',[32         174        1249         531])
+                subplot(2,3,ctry)
                 plotDeriv()
 
             end
@@ -106,7 +104,7 @@ function [outsideFilename,...
             disp('****************************************')
         end
     end
-
+    
     function plotDeriv()
         
         diffData = diff(dataToFit);
@@ -124,35 +122,38 @@ function [outsideFilename,...
             'facecolor',parameters.grey,'edgecolor','none')
         hold on
         
-        plot(diffData,'.','markersize',26)
+        P1 = plot(diffData,'.','markersize',26);
 
         axis tight
         YL = ylim;
         ylim([YL(1) yLimit]);
-        RL = exp(-abs(fit.AIC - fit.fulLAIC)/2);
-        XL = xlim;
-        dX = XL(2) - XL(1);
+        RL = sign((fit.AIC - fit.fulLAIC))*exp(-abs(fit.AIC - fit.fulLAIC)/2);
+        %XL = xlim;
+        %dX = XL(2) - XL(1);
 
         if ctry == 1
             text(times(end)-11.5,0.15*YL(2),...
-                [{[num2str(extendTimeLength),'day']},{'projection'}]);
+                [{[num2str(extendTimeLength),' day']},{'projection'}]);
         end
         
-        if ismember(ctry , [1,4,7]) || countryOutplot
+        if ismember(ctry , [1,4]) || countryOutplot
             ylabel('daily deaths')
         end
-        if ismember(ctry , [7,8,9]) || countryOutplot
+        if ismember(ctry , [4,5,6]) || countryOutplot
             xlabel('days from first recorded case')
         end
 
-        RLscale = 0.35;
-        if countryOutplot
-            RLscale = 0.7;
-        end
-        text(XL(1) + 0.075*dX,RLscale*YL(2),['RL ',num2str(RL,3)],'fontsize',12);
+        %RLscale = 0.35;
+        %if countryOutplot
+        %    RLscale = 0.7;
+        %end
+        %text(XL(1) + 0.075*dX,RLscale*YL(2),['RL ',num2str(RL,3)],'fontsize',12);
 
-        plot(fit.extendTime(2:end),diff(fit.midCI),'-b','linewidth',1)
-        plot(fit.extendTime(2:end),diff(fit.fullmidCI),'-k','linewidth',1)       
+        P2 = plot(fit.extendTime(2:end),diff(fit.midCI),'-b','linewidth',1);
+        P3 = plot(fit.extendTime(2:end),diff(fit.fullmidCI),'-k','linewidth',1);       
+        P4 = plot(NaN,NaN,'.w');
+        
+        %plot(fit.extendTime(2:end),diff(fit.ddFitFunction(fit.extendTime)),'-r','linewidth',2);
         
         plot(fit.extendTime(2:end),diff(fit.upperCI),':b')
         plot(fit.extendTime(2:end),diff(fit.fullupperCI),':k')    
@@ -169,9 +170,8 @@ function [outsideFilename,...
 
         ylim([0 finalYLimit])
         
-        legend({[countryStr,' data'],...
-            'SIR model','SIR model upper 99% CI',...            
-            'iso model', 'iso model 99% CI'},'Location','northwest')
+        legend([P1,P2,P3,P4],{countryStr,...
+            'LGR','2LGR',['RL ',num2str(RL,3)]},'Location','northeast')
         legend('boxoff')        
         
     end
@@ -195,41 +195,41 @@ function [outsideFilename,...
             'facecolor',parameters.grey,'edgecolor','none')
         hold on
         
-        plot(dataToFit,'.','markersize',26)
+        Q1 = plot(dataToFit,'.','markersize',26);
 
         axis tight
         YL = ylim;
         ylim([YL(1) yLimit]);
-        RL = exp(-abs(fit.AIC - fit.fulLAIC)/2);
-        XL = xlim;
-        dX = XL(2) - XL(1);
+        RL = sign(fit.AIC - fit.fulLAIC)*exp(-abs(fit.AIC - fit.fulLAIC)/2);
+        %XL = xlim;
+        %dX = XL(2) - XL(1);
 
         if ctry == 1
             text(times(end)-11.5,0.15*YL(2),...
-                [{[num2str(extendTimeLength),'day']},{'projection'}]);
+                [{[num2str(extendTimeLength),' day']},{'projection'}]);
         end
         
-        if ismember(ctry , [1,4,7]) || countryOutplot
+        if ismember(ctry , [1,4]) || countryOutplot
             ylabel('cumulative deaths')
         end
-        if ismember(ctry , [7,8,9]) || countryOutplot
+        if ismember(ctry , [4,5,6]) || countryOutplot
             xlabel('days from first recorded case')
         end
 
-        RLscale = 0.35;
-        if countryOutplot
-            RLscale = 0.7;
-        end
-        text(XL(1) + 0.075*dX,RLscale*YL(2),['RL ',num2str(RL,3)],'fontsize',12);
+        %RLscale = 0.9;
+        %if countryOutplot
+        %    RLscale = 0.7;
+        %end
+        %text(XL(1) + 0.075*dX,RLscale*YL(2),['RL ',num2str(RL,3)],'fontsize',12);
 
-        plot(fit.extendTime,fit.midCI,'-b','linewidth',1)
+        Q2 = plot(fit.extendTime,fit.midCI,'-b','linewidth',1);
         %plot(fit.extendTime,fit.lowerCI,':b')
         plot(fit.extendTime,fit.upperCI,':b')
 
-        plot(fit.extendTime,fit.fullmidCI,'-k','linewidth',1)
+        Q3 = plot(fit.extendTime,fit.fullmidCI,'-k','linewidth',1);
         %plot(fit.extendTime,fit.fulllowerCI,':k')
         plot(fit.extendTime,fit.fullupperCI,':k')    
-        
+                
         %this puts Gaussian process regression on there too:
         %plot(fit.times,fit.GRP,'-.r')
 
@@ -242,11 +242,12 @@ function [outsideFilename,...
 
         ylim([0 finalYLimit])
         
-        legend({[countryStr,' data'],...
-            ['SIR model (adj R^2 \approx',num2str(fit.adjR2,4),')'],...            
-            'SIR model 99% CI',...            
-            ['iso model (',num2str(fit.fulladjR2,4),')']...
-            'iso model 99% CI'},'Location','northwest')
+        Q4 = plot(NaN,NaN,'.w');
+        
+        legend([Q1,Q2,Q3,Q4],{countryStr,...
+            ['LGR (adj R^2 \approx',num2str(fit.adjR2,4),')'],...            
+            ['2LGR (',num2str(fit.fulladjR2,4),')'],...
+            ['RL ',num2str(RL,3)]},'Location','northwest')
         legend('boxoff')
         
         if strcmp(countryStr,'United Kingdom')

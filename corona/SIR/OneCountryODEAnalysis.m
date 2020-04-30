@@ -1,4 +1,5 @@
-function [Deathsestimate,DeathsestimateMaxCI99,initialIsolationGuess] = OneCountryODEAnalysis(MATdata,countryStr,rectangleOn)
+function [Deathsestimate,DeathsestimateMaxCI99,initialIsolationGuess] = ...
+    OneCountryODEAnalysis(MATdata,countryStr,rectangleOn)
 
     if nargin < 3
         rectangleOn = true;
@@ -13,15 +14,16 @@ function [Deathsestimate,DeathsestimateMaxCI99,initialIsolationGuess] = OneCount
     set(1,'pos',[60     1   885   704])
     
     MM = 2;
-    tryThisDeltaRange = [0.01 0.02 0.03 0.04 0.05];
 
     %this is the default in case a changepoint isn't detected:
 	defaultChangePoint = 20;
 
     parameters = defaulParameters();
     countryStrings = parameters.countryStrings;
+    Pguesses = parameters.Pguesses;
     extendtime = 40;
-    
+    tryThisDeltaRange = parameters.tryThisDeltaRange;
+
     cj = find(strcmp(countryStr,MATdata.country));
     cdata = MATdata.deathData{cj};
     
@@ -38,18 +40,10 @@ function [Deathsestimate,DeathsestimateMaxCI99,initialIsolationGuess] = OneCount
     times = 1:T;
 
     fguess = find(strcmp(countryStr,countryStrings));
-    Pguesses = {[0.44775 0.44341 0.28533 ],...
-        [0.49097 0.48447 0.21848 ],...
-        [0.40009 0.40009 0.13918 ],...
-        [0.31967 0.31884 0.03864 ],...
-        [0.36294 0.36257 0.17064 ],...
-        [0.23272 0.23168 0.012949 ],...
-        [0.41816 0.41768 0.162 ],...
-        [0.41445 0.4143 0.10843 ],...
-        [0.41438 0.41436 0.093819 ],...
-        };
+    LockdownStart = parameters.LockdownStart(fguess);
+    LockdownStart = LockdownStart - firstDeath + 1;
 
-    opts = statset('MaxIter',2000,'TolX',1e-12,'TolFun',1e-12);
+    opts = statset('MaxIter',2000,'TolX',1e-14,'TolFun',1e-14);
 
     if not(isempty(fguess))
         pg = Pguesses{fguess};
@@ -57,7 +51,7 @@ function [Deathsestimate,DeathsestimateMaxCI99,initialIsolationGuess] = OneCount
         pg = [1 1 1]*0.5;
     end
 
-    fit = fitnlm(times,scdataToFit,@(p,T)Solve(p,T),pg,'Options',opts)
+    fit = fitnlm(times,scdataToFit,@(p,T)sirSolve(p,T),pg,'Options',opts)
     betterGuess = abs(fit.Coefficients.Estimate);
     
     a = abs(betterGuess(1));
@@ -70,8 +64,8 @@ function [Deathsestimate,DeathsestimateMaxCI99,initialIsolationGuess] = OneCount
     Y = deaths*fit.feval(extendtimes);
 
     %policy model error bars:    
-    [beta,resid,J,sigma] = nlinfit(times,scdataToFit,@(p,T)Solve(p,T),betterGuess);
-    [deltaFit, delta] = nlpredci(@(p,t)Solve(p,t),extendtimes,...
+    [beta,resid,J,sigma] = nlinfit(times,scdataToFit,@(p,T)sirSolve(p,T),betterGuess);
+    [deltaFit, delta] = nlpredci(@(p,t)sirSolve(p,t),extendtimes,...
         beta,resid,'Covar',sigma,'alpha',0.01);
 
     upperCI = deaths*(deltaFit + delta);
@@ -88,6 +82,7 @@ function [Deathsestimate,DeathsestimateMaxCI99,initialIsolationGuess] = OneCount
     
     plot(extendtimes,Y,'-k','linewidth',1);
     hold on
+    
     %plot(times,dataToFit,'o','markersize',6,'linewidth',1);
     plot(times,dataToFit,'.','markersize',26)        
     axis tight
@@ -104,7 +99,7 @@ function [Deathsestimate,DeathsestimateMaxCI99,initialIsolationGuess] = OneCount
     ylabel('cumulative deaths')
     xlabel('days from first recorded death')
 
-    text(5,ylimit*0.65,'$\frac{dD}{dt} = \alpha - \beta D - \gamma e^{-\mu D}$',...
+    text(5,ylimit*0.65,'$\frac{dD}{dt} = \alpha - \beta e^{-\mu D} - \gamma D$',...
         'interpreter','latex');
     text(times(end) + 1,ylimit*0.2,{[num2str(extendtime),' day'],'projection'});
 
@@ -148,9 +143,9 @@ function [Deathsestimate,DeathsestimateMaxCI99,initialIsolationGuess] = OneCount
         changePoint = defaultChangePoint;
     end
     
-    plot(extendtimes(2:end),dY./Y(2:end),'-k','linewidth',1);
+    qq1 = plot(extendtimes(2:end),dY./Y(2:end),'-k','linewidth',1);
     hold on
-    plot(times(2:end),PCD,'.','markersize',26)
+    qq2 = plot(times(2:end),PCD,'.','markersize',26);
     %plot(extendtimes(2:end),movmean(diff(upperCI),MM)./upperCI(2:end),':k')
     %plot(extendtimes(2:end),movmean(diff(lowerCI),MM)./lowerCI(2:end),':k')
     axis tight
@@ -158,7 +153,7 @@ function [Deathsestimate,DeathsestimateMaxCI99,initialIsolationGuess] = OneCount
     
     halfchangePoint = floor(changePoint/2);
     
-	plot(extendtimes(1:halfchangePoint),1./extendtimes(1:halfchangePoint),...
+	qq3 = plot(extendtimes(1:halfchangePoint),1./extendtimes(1:halfchangePoint),...
         '--r','linewidth',2);
     plot([extendtimes(2) changePoint],[1 1]*mean(PCD(halfchangePoint:changePoint)),...
         '--r','linewidth',2);
@@ -172,13 +167,16 @@ function [Deathsestimate,DeathsestimateMaxCI99,initialIsolationGuess] = OneCount
     disp([countryStr,' decay tail : ',num2str(decayTail(2))]);
     disp(' ')
     
+    YL = ylim;
+    qq4 = plot([LockdownStart LockdownStart],[YL(1) YL(2)],':r','linewidth',1);
+    
     plot(extendtimes(changePoint:end),expTail.feval(extendtimes(changePoint:end)),...
         '--r','linewidth',2);
-    
+        
     ylabel('per capita daily deaths')
     xlabel('days from first recorded death')
 
-    legend({'SIR fit',countryStr,'asymptotes'},'Location','northeast')
+    legend([qq1,qq2,qq3,qq4],{'SIR fit',countryStr,'asymptotes','lockdown'},'Location','northeast')
     legend('boxoff')
 
     subplot(2,2,4)
@@ -199,9 +197,9 @@ function [Deathsestimate,DeathsestimateMaxCI99,initialIsolationGuess] = OneCount
     Cscdata = sum(Ccdata,1);    
     CfirstDeath = find(Cscdata,1,'first');    
     CdataToFit = Cscdata(CfirstDeath:end);
-    
+
     CPCD = diff(CdataToFit)./CdataToFit(2:end);
-    CexpTail = fitnlm(changePoint:length(CPCD),CPCD(changePoint:end),...
+    CexpTail = fitnlm(1:length(CPCD),CPCD,...
         @(p,t)abs(p(1))*exp(-abs(p(2)*t)),[0.367 0.0746],'Options',opts);
     CdecayTail = abs(CexpTail.Coefficients.Estimate);
     plot(extendtimes(1:end),CexpTail.feval(extendtimes((1:end))),...
@@ -285,7 +283,7 @@ function [Deathsestimate,DeathsestimateMaxCI99,initialIsolationGuess] = OneCount
     	[lambda,d,S0,P0,I0,rho,Rend,Iend,Send] = parametersFromDelta(delta);    
         IC = [S0 I0 0 0];
         p = [lambda rho d];
-        [SIRtimes,SIRoutput] = ode113(@(t,x)modelSIR(x,p),[1,extendtimes(end)],IC,options);
+        [SIRtimes,SIRoutput] = ode113(@(t,x)SIRmodel(x,p),[1,extendtimes(end)],IC,options);
         S = SIRoutput(:,1);
         I = SIRoutput(:,2);
         R = SIRoutput(:,3);
@@ -364,44 +362,4 @@ function [Deathsestimate,DeathsestimateMaxCI99,initialIsolationGuess] = OneCount
         
 end
 
-function solution = Solve(p,T)
-
-    IC = 0;
-    model = @(t,x)F(x,p);
-    options = odeset('NonNegative',[1]);
-    [soltimes,output] = ode113(model,[1,T(end)],IC,options);
-    solution = interp1(soltimes,output,T,'pchip');
-    
-end
-
-function Ddot = F(x,p)
-
-    A = abs(p(1));
-    B = abs(p(2));
-    C = abs(p(3));
-
-    D = x(1);    
-    Ddot = A - B*exp(-abs(D)) - C*D;
-
-end
-
-function rhs = modelSIR(x,p)
-
-    S = x(1);
-    I = x(2);
-    R = x(3);
-    D = x(4);
-    
-    lambda = p(1);
-    rho = p(2);
-    d = p(3);
-    
-    dotS = -lambda*S*I;
-    dotI = lambda*S*I - (d+rho)*I;
-    dotR = rho*I;
-    dotD = d*I;
-    
-    rhs = [dotS ; dotI ; dotR ; dotD];
-
-end
 

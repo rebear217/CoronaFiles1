@@ -13,7 +13,7 @@ function gprMdl = basicFits(MATdata,savePDF)
     
     parameters = defaulParameters();
     
-    extendDays = 7;
+    extendDays = 1;
     
     countryStrings = {'China', ...
         'Denmark', ...
@@ -23,7 +23,7 @@ function gprMdl = basicFits(MATdata,savePDF)
         'Switzerland', ...
         'Spain', ...
         'United Kingdom', ...
-        'US'};
+        'Sweden'};
 
     turningPointCountries = 1:9;
     

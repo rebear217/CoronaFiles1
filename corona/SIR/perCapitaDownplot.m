@@ -14,9 +14,11 @@ function perCapitaDownplot(MATdata,includeList)
         includeList = {};
     end
     
+    parameters = defaulParameters();
+    
     for ctry = 1:N
         Ddata = sum(MATdata.deathData{ctry},1);        
-        if (Ddata(end) > 100)
+        if (Ddata(end) > parameters.limitDeaths)
             s = (ctry-1)/(N-1);
             col = [s 0.5 1-s];
             d = getPCD(Ddata,MATdata.country{ctry});

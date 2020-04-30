@@ -9,7 +9,7 @@ function clusterPCA(MATdata,timePoints)
 
     plots = [];
     
-    deathMinimum = 2;
+    deathMinimum = parameters.limitDeaths;
     
     if nargin < 2
         timePoints = 25;

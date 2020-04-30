@@ -2,6 +2,7 @@ close all
 clc
 clear variables
 
+load('censusData.mat')
 
 %%
 
@@ -76,7 +77,23 @@ close all
 %M = 79;%worked up to 11 April
 %M = 80;%worked up to 12 April
 %M = 81;%worked up to 13 April
-M = 82;%worked up to 
+%M = 82;%worked up to 14 April
+%M = 83;%worked up to 15 April
+%M = 84;%worked up to 16 April
+%M = 85;%worked up to 17 April
+%seem to have missed 18 April
+%M = 87;%worked up to 19 April
+%M = 88;%worked up to 20 April
+%M = 89;%worked up to 21 April
+%M = 90;%worked up to 22 April
+%M = 91;%worked up to 23 April
+%M = 92;%worked up to 24 April
+%M = 93;%worked up to 25 April
+%M = 94;%worked up to 26 April
+%M = 95;%worked up to 27 April
+%M = 96;%worked up to 28 April
+%M = 97;%worked up to 29 April
+M = 98;%worked up to 
 
 %or this:
 %M = M-1;
@@ -92,13 +109,29 @@ figure(1)
 set(1,'pos', [148     1   958   704]);
 
 for c = 1:length(countries)
+    
     s = (c-1) / (length(countries) - 1);
     col = [s 0.5 1-s];
     
     thisCountry = countries{c};
     F = find(strcmp(thisCountry,allCountries));
     Fi = find(strcmp(thisCountry,IcaseCountries));
-    
+    Fipop = find(strcmp(thisCountry,population2016countries));
+    if strcmp(thisCountry,'US')
+        Fipop = find(strcmp('United States',population2016countries));
+    end
+    if strcmp(thisCountry,'Korea, South')
+        Fipop = 190;
+    end
+    if strcmp(thisCountry,'Czechia')
+        Fipop = 52;
+    end
+    if strcmp(thisCountry,'Russia')
+        Fipop = 199;
+    end
+    if strcmp(thisCountry,'Slovakia')
+        Fipop = 218;
+    end
     rowData = zeros(length(F),M);
     rowDataICase = zeros(length(Fi),M);
     for j = 1:length(F)
@@ -113,6 +146,11 @@ for c = 1:length(countries)
     MATdata.country{c} = thisCountry;
     MATdata.deathData{c} = rowData;
     MATdata.ICaseData{c} = rowDataICase;
+    if ~isempty(Fipop)
+        MATdata.population{c} = population2016(Fipop);
+    else
+        disp([thisCountry,' needs population data sorting']);
+    end
     
     %if strcmp(thisCountry,'France')
     %    FranceData = sum(MATdata.deathData{c},1);        
@@ -120,11 +158,15 @@ for c = 1:length(countries)
     %    MATdata.deathData{c} = [urlFranceData FranceDataTail];        
     %end
     
-	%if strcmp(thisCountry,'China')
+	if strcmp(thisCountry,'China')
     %    ChinaHead = cumsum([1 0 0 0 1 0 0 0 1 0 3]);
-    %	ChinaData = sum(MATdata.deathData{c},1);        
     %    MATdata.deathData{c} = [ChinaHead ChinaHead(end) + ChinaData];
-    %end
+    	ChinaData = MATdata.deathData{c};
+        ChinaEnd = ChinaData(:,85);
+        [~,CL] = size(ChinaData);
+        ChinaTail = repmat(ChinaEnd,1,CL-85);
+    	MATdata.deathData{c} = [ChinaData(:,1:85) ChinaTail];
+    end
     
     subplot(2,2,1)
     semilogy(sum(rowData,1));
@@ -153,6 +195,19 @@ for c = 1:length(countries)
     
 end
 
+%%
+
+%add it global totals at the end using
+%MATdata.country{end} = 'Global'
+globalStatistics;
+
+%%
+
+%try and correct the UK problems with a different source:
+correctUK;
+
+%%
+
 save('deathData.mat','MATdata')
 axis tight
 
@@ -169,6 +224,21 @@ export_fig('basicDeathDataPlot.PDF')
 
 %%
 
+lengths = zeros(1,length(MATdata.country));
+for c = 1:length(MATdata.country)
+    lengths(c) = length(MATdata.deathData);
+end
+
+L = unique(lengths);
+if length(L) > 1
+    disp('There are different datasets with different lengths');
+else
+    disp('There are NOT different datasets with different lengths');
+end
+
+%%
+
 clear variables
 load('deathData.mat')
 load('USdeathData.mat')
+

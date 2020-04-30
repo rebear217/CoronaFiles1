@@ -108,8 +108,8 @@ function generatePlots()
     my_export_fig('allDynamics.pdf')
 
     figure(2)
-    legend(fulllegends,'Location','east')
-    legend('boxoff')
+    legend(fulllegends,'Location','southeast')
+    %legend('boxoff')
     my_export_fig('dead.pdf')
 
 end
